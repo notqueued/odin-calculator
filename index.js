@@ -6,44 +6,90 @@ let buttons = Array.from(document.getElementsByClassName('button'));
 
 buttons.map( button => {
     button.addEventListener('click', (e) => {
-        switch(e.target.textContent){
-            case 'C':
-                clearScreen();
-                break;
-            case '=':
-                try{
-                    operate();
-                    inputSc.textContent = '';
-                } catch {
-                    inputSc.textContent = "Error";
-                }
-                break;
-            case '⌫':
-                deleteCharacter();
-                break;
-            case '.':
-                addDot(e.target.textContent);
-                break;
-            case '-':
-                addMinus(e.target.textContent);
-                break;
-            case '/':
-            case 'x':
-            case '+':
-                addOperation(e.target.textContent);
-                break;
-            default:
-                addNumber(e.target.textContent);
-        }
-        if (inputSc.textContent.match(/^[0-9]+\s[\+\-\/x]\s[0-9]+$/)) {
-            operate();
-        } else if (inputSc.textContent.match(/^[0-9]+\s[\+\-\/x]\s[0-9]+\s[\+\-\/x]$/)) {
-            console.log("test2");
-            let resolve = inputSc.textContent.split(" ");
-            inputSc.textContent = outputSc.textContent + " " + resolve.pop();
-        }
+        commandCenter(e.target.textContent);
     });
 });
+
+
+window.addEventListener("keydown", keyPressed);
+
+function keyPressed(e) {
+    switch (e.key) {
+        case 'Escape':
+            commandCenter('C');
+            break;
+        case '=':
+        case 'Enter':
+            commandCenter('=');
+            break;
+        case 'Backspace':
+            commandCenter('⌫');
+            break;
+        case '.':
+            commandCenter('.');
+            break;
+        case '-':
+            commandCenter('-');
+            break;
+        case '/':
+        case '+':
+            commandCenter(e.key);
+            break;
+        case '*':
+            commandCenter("x");
+            break;
+        case "0":
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9":
+            commandCenter(e.key);
+            break;
+    }
+}
+
+function commandCenter(e) {
+    switch(e){
+        case 'C':
+            clearScreen();
+            break;
+        case '=':
+            try{
+                operate();
+                inputSc.textContent = '';
+            } catch {
+                inputSc.textContent = "Error";
+            }
+            break;
+        case '⌫':
+            deleteCharacter();
+            break;
+        case '.':
+            addDot(e);
+            break;
+        case '-':
+            addMinus(e);
+            break;
+        case '/':
+        case 'x':
+        case '+':
+            addOperation(e);
+            break;
+        default:
+            addNumber(e);
+    }
+    if (inputSc.textContent.match(/^(\-)*[0-9]+\s[\+\-\/x]\s(\-)*[0-9]+$/)) {
+        operate();
+    } else if (inputSc.textContent.match(/^(\-)*[0-9]+\s[\+\-\/x]\s(\-)*[0-9]+\s[\+\-\/x]$/)) {
+        let resolve = inputSc.textContent.split(" ");
+        inputSc.textContent = outputSc.textContent + " " + resolve.pop();
+    }
+}
 
 function clearScreen() {
     inputSc.textContent = '';
@@ -72,15 +118,15 @@ function addDot(eText) {
 function addMinus(eText) {
     const dotRelated = inputSc.textContent.split(" ").pop();
 
-    if (inputSc.textContent === "Error" || inputSc.textContent === "") {
+    if (inputSc.textContent === "Error" || (inputSc.textContent === "" && outputSc.textContent === "")) {
         inputSc.textContent = "-";
-    } else if (inputSc.textContent.length === 0 && 
+    } else if (inputSc.textContent === "" && 
                outputSc.textContent.match(/[0-9]/)) {
         inputSc.textContent += outputSc.textContent + " " +  eText;
         outputSc.textContent = '';
     } else if (dotRelated[dotRelated.length-1] === "."){
         inputSc.textContent = inputSc.textContent.slice(0,-1) + " " + eText;
-    } else if (inputSc.textContent.match(/\d\s[\+x\/\-]\s\-$/) ||
+    } else if (inputSc.textContent.match(/(\d\s)*[\+x\/\-]\s\-$/) ||
                inputSc.textContent === "-") {
         return;
     } else {
@@ -94,7 +140,8 @@ function addOperation(eText) {
 
     if (inputSc.textContent === "Error" || 
         (inputSc.textContent === "" && outputSc.textContent === "") ||
-        inputSc.textContent.match(/[\+x\/]\s\-$/)) {
+        inputSc.textContent.match(/[\+x\/]\s\-$/) ||
+        inputSc.textContent.match(/^\-$/)) {
         return;
     }  else if (inputSc.textContent.length === 0 && 
                 outputSc.textContent.match(/[0-9]/)) {
@@ -110,6 +157,14 @@ function addOperation(eText) {
 }
 
 function addNumber(eText) {
+    const nrLength = inputSc.textContent.split(" ");
+    if (inputSc.textContent !== "Error" && nrLength.length === 1 && nrLength[0].replace("-", "").length > 0 && 
+        nrLength[0].match(/\d+/g).join("").length === 13) {
+        return;
+    } else if (inputSc.textContent !== "Error" && nrLength.length === 3 && nrLength[2].replace("-", "").length > 0 &&
+               nrLength[2].match(/\d+/g).join("").length === 13) {
+        return;
+    }
     const dotRelated = inputSc.textContent.split(" ").pop();
     
     if (inputSc.textContent === "Error") {

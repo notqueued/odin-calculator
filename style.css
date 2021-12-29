@@ -23,11 +23,12 @@ body {
 }
 
 .display {
-    height: 3rem;
+    height: 4rem;
     width: 230px;
     text-align: right;
     font-size: 1.2rem;
     line-height: 1.2rem;
+    overflow: hidden;
 }
 
 .button {
